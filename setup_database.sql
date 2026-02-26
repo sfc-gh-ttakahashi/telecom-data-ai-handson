@@ -172,7 +172,27 @@ SELECT COUNT(*) AS TOTAL_RECORDS FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STA
 SELECT * FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STATUS LIMIT 10;
 
 -- ============================================================
--- STEP 12: データ確認サマリ
+-- STEP 12: Step 8 応用編 — Container Runtime 用設定
+--   Snowpark ML でカスタムモデルを構築するために必要です。
+--   コンピュートプールを作成し、Notebook に割り当てます。
+-- ============================================================
+
+-- Container Runtime 用コンピュートプール（GPU なし・CPU のみ）
+-- scikit-learn / XGBoost は Container Runtime にプリインストール済みのため
+-- External Access Integration は不要です（トライアルアカウントでも実行可能）
+CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
+    MIN_NODES = 1
+    MAX_NODES = 1
+    INSTANCE_FAMILY = CPU_X64_S
+    AUTO_SUSPEND_SECS = 300
+    COMMENT = 'Compute pool for Telecom ML Handson (Container Runtime)';
+
+-- Notebook に Container Runtime（コンピュートプール）を割り当て
+ALTER NOTEBOOK TELECOM_AI_HANDSON
+    SET COMPUTE_POOL = 'TELECOM_ML_POOL';
+
+-- ============================================================
+-- STEP 13: データ確認サマリ
 -- ============================================================
 SELECT 'AREA_MASTER' AS TABLE_NAME, COUNT(*) AS ROW_COUNT FROM TELECOM_AI_HANDSON.RAW.AREA_MASTER
 UNION ALL
