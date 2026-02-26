@@ -178,6 +178,8 @@ SELECT * FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STATUS LIMIT 10;
 -- ============================================================
 
 -- Container Runtime 用コンピュートプール（GPU なし・CPU のみ）
+-- scikit-learn / XGBoost は Container Runtime にプリインストール済みのため
+-- External Access Integration は不要です（トライアルアカウントでも実行可能）
 CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
     MIN_NODES = 1
     MAX_NODES = 1
@@ -185,23 +187,10 @@ CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
     AUTO_SUSPEND_SECS = 300
     COMMENT = 'Compute pool for Telecom ML Handson (Container Runtime)';
 
--- External Access Integration（pip install 用）
--- ※ アカウントで既に設定済みの場合はスキップ可
-CREATE OR REPLACE NETWORK RULE TELECOM_PYPI_NETWORK_RULE
-    MODE = EGRESS
-    TYPE = HOST_PORT
-    VALUE_LIST = ('pypi.org', 'files.pythonhosted.org');
-
-CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION TELECOM_PYPI_ACCESS
-    ALLOWED_NETWORK_RULES = (TELECOM_PYPI_NETWORK_RULE)
-    ENABLED = TRUE
-    COMMENT = 'Allow pip install from PyPI for ML handson';
-
 -- Notebook に Container Runtime を有効化する場合のコマンド
 -- （Snowsight UI からも設定可能です）
 -- ALTER NOTEBOOK TELECOM_AI_HANDSON
---     SET COMPUTE_POOL = 'TELECOM_ML_POOL'
---         EXTERNAL_ACCESS_INTEGRATIONS = ('TELECOM_PYPI_ACCESS');
+--     SET COMPUTE_POOL = 'TELECOM_ML_POOL';
 
 -- ============================================================
 -- STEP 13: データ確認サマリ
