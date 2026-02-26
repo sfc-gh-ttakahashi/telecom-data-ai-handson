@@ -172,7 +172,39 @@ SELECT COUNT(*) AS TOTAL_RECORDS FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STA
 SELECT * FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STATUS LIMIT 10;
 
 -- ============================================================
--- STEP 12: データ確認サマリ
+-- STEP 12: （オプション）Step 3+ 応用編 — Container Runtime 用設定
+--   Snowpark ML でカスタムモデルを構築する場合に必要です。
+--   Step 3 の ML Functions のみ実施する場合はスキップしてください。
+-- ============================================================
+
+-- Container Runtime 用コンピュートプール（GPU なし・CPU のみ）
+CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
+    MIN_NODES = 1
+    MAX_NODES = 1
+    INSTANCE_FAMILY = CPU_X64_S
+    AUTO_SUSPEND_SECS = 300
+    COMMENT = 'Compute pool for Telecom ML Handson (Container Runtime)';
+
+-- External Access Integration（pip install 用）
+-- ※ アカウントで既に設定済みの場合はスキップ可
+CREATE OR REPLACE NETWORK RULE TELECOM_PYPI_NETWORK_RULE
+    MODE = EGRESS
+    TYPE = HOST_PORT
+    VALUE_LIST = ('pypi.org', 'files.pythonhosted.org');
+
+CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION TELECOM_PYPI_ACCESS
+    ALLOWED_NETWORK_RULES = (TELECOM_PYPI_NETWORK_RULE)
+    ENABLED = TRUE
+    COMMENT = 'Allow pip install from PyPI for ML handson';
+
+-- Notebook に Container Runtime を有効化する場合のコマンド
+-- （Snowsight UI からも設定可能です）
+-- ALTER NOTEBOOK TELECOM_AI_HANDSON
+--     SET COMPUTE_POOL = 'TELECOM_ML_POOL'
+--         EXTERNAL_ACCESS_INTEGRATIONS = ('TELECOM_PYPI_ACCESS');
+
+-- ============================================================
+-- STEP 13: データ確認サマリ
 -- ============================================================
 SELECT 'AREA_MASTER' AS TABLE_NAME, COUNT(*) AS ROW_COUNT FROM TELECOM_AI_HANDSON.RAW.AREA_MASTER
 UNION ALL
