@@ -172,9 +172,9 @@ SELECT COUNT(*) AS TOTAL_RECORDS FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STA
 SELECT * FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STATUS LIMIT 10;
 
 -- ============================================================
--- STEP 12: （オプション）Step 3+ 応用編 — Container Runtime 用設定
---   Snowpark ML でカスタムモデルを構築する場合に必要です。
---   Step 3 の ML Functions のみ実施する場合はスキップしてください。
+-- STEP 12: Step 8 応用編 — Container Runtime 用設定
+--   Snowpark ML でカスタムモデルを構築するために必要です。
+--   コンピュートプールを作成し、Notebook に割り当てます。
 -- ============================================================
 
 -- Container Runtime 用コンピュートプール（GPU なし・CPU のみ）
@@ -187,10 +187,9 @@ CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
     AUTO_SUSPEND_SECS = 300
     COMMENT = 'Compute pool for Telecom ML Handson (Container Runtime)';
 
--- Notebook に Container Runtime を有効化する場合のコマンド
--- （Snowsight UI からも設定可能です）
--- ALTER NOTEBOOK TELECOM_AI_HANDSON
---     SET COMPUTE_POOL = 'TELECOM_ML_POOL';
+-- Notebook に Container Runtime（コンピュートプール）を割り当て
+ALTER NOTEBOOK TELECOM_AI_HANDSON
+    SET COMPUTE_POOL = 'TELECOM_ML_POOL';
 
 -- ============================================================
 -- STEP 13: データ確認サマリ
