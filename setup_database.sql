@@ -23,6 +23,17 @@ CREATE WAREHOUSE IF NOT EXISTS COMPUTE_WH
     COMMENT = 'Warehouse for Telecom AI Handson';
 
 -- ============================================================
+-- STEP 2b: Container Runtime 用コンピュートプールの作成
+--   Notebook を Container Runtime で実行するために必要です。
+-- ============================================================
+CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
+    MIN_NODES = 1
+    MAX_NODES = 1
+    INSTANCE_FAMILY = CPU_X64_S
+    AUTO_SUSPEND_SECS = 300
+    COMMENT = 'Compute pool for Telecom ML Handson (Container Runtime)';
+
+-- ============================================================
 -- STEP 3: データベースの作成
 -- ============================================================
 CREATE DATABASE IF NOT EXISTS TELECOM_AI_HANDSON;
@@ -69,8 +80,8 @@ CREATE OR REPLACE GIT REPOSITORY TELECOM_AI_HANDSON.RAW.GIT_TELECOM_HANDSON
 CREATE OR REPLACE NOTEBOOK TELECOM_AI_HANDSON
     FROM @TELECOM_AI_HANDSON.RAW.GIT_TELECOM_HANDSON/branches/main/
     MAIN_FILE = 'TELECOM_AI_HANDSON.ipynb'
-    QUERY_WAREHOUSE = compute_wh
-    WAREHOUSE = compute_wh;
+    QUERY_WAREHOUSE = COMPUTE_WH
+    COMPUTE_POOL = TELECOM_ML_POOL;
 
 -- リポジトリの内容確認
 LIST @TELECOM_AI_HANDSON.RAW.GIT_TELECOM_HANDSON/branches/main;
@@ -172,27 +183,7 @@ SELECT COUNT(*) AS TOTAL_RECORDS FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STA
 SELECT * FROM TELECOM_AI_HANDSON.ANALYTICS.EQUIPMENT_STATUS LIMIT 10;
 
 -- ============================================================
--- STEP 12: Step 8 応用編 — Container Runtime 用設定
---   Snowpark ML でカスタムモデルを構築するために必要です。
---   コンピュートプールを作成し、Notebook に割り当てます。
--- ============================================================
-
--- Container Runtime 用コンピュートプール（GPU なし・CPU のみ）
--- scikit-learn / XGBoost は Container Runtime にプリインストール済みのため
--- External Access Integration は不要です（トライアルアカウントでも実行可能）
-CREATE COMPUTE POOL IF NOT EXISTS TELECOM_ML_POOL
-    MIN_NODES = 1
-    MAX_NODES = 1
-    INSTANCE_FAMILY = CPU_X64_S
-    AUTO_SUSPEND_SECS = 300
-    COMMENT = 'Compute pool for Telecom ML Handson (Container Runtime)';
-
--- Notebook に Container Runtime（コンピュートプール）を割り当て
-ALTER NOTEBOOK TELECOM_AI_HANDSON
-    SET COMPUTE_POOL = 'TELECOM_ML_POOL';
-
--- ============================================================
--- STEP 13: データ確認サマリ
+-- STEP 12: データ確認サマリ
 -- ============================================================
 SELECT 'AREA_MASTER' AS TABLE_NAME, COUNT(*) AS ROW_COUNT FROM TELECOM_AI_HANDSON.RAW.AREA_MASTER
 UNION ALL
