@@ -43,8 +43,7 @@ WITH recent_data AS (
         ON nq.MEASURE_DATE = w.WEATHER_DATE
     WHERE nq.MEASURE_DATE >= DATEADD('day', -30, CURRENT_DATE())
     GROUP BY nq.MEASURE_DATE
-),
-iso_model AS MODEL NQ_ISOLATION_FOREST VERSION v1
+)
 SELECT
     MEASURE_DATE,
     CALL_DROP_RATE,
@@ -58,7 +57,7 @@ FROM (
         rd.CALL_DROP_RATE,
         rd.PRECIPITATION_MM,
         rd.WIND_SPEED_KMH,
-        iso_model!PREDICT(
+        MODEL(TELECOM_AI_HANDSON.ANALYTICS.NQ_ISOLATION_FOREST, V1)!PREDICT(
             rd.CALL_DROP_RATE,
             rd.AVG_DOWNLOAD_MBPS,
             rd.AVG_LATENCY_MS,
@@ -119,8 +118,7 @@ traffic_recent AS (
     FROM traffic_features
     WHERE TRAFFIC_LAG_7 IS NOT NULL
       AND MEASURE_DATE >= DATEADD('day', -30, CURRENT_DATE())
-),
-xgb_model AS MODEL NQ_TRAFFIC_XGBOOST VERSION v1
+)
 SELECT
     MEASURE_DATE,
     ACTUAL_GB,
@@ -130,7 +128,7 @@ FROM (
     SELECT
         tr.MEASURE_DATE,
         tr.TOTAL_TRAFFIC_GB                                     AS ACTUAL_GB,
-        xgb_model!PREDICT(
+        MODEL(TELECOM_AI_HANDSON.ANALYTICS.NQ_TRAFFIC_XGBOOST, V1)!PREDICT(
             tr.TRAFFIC_LAG_1,
             tr.TRAFFIC_LAG_3,
             tr.TRAFFIC_LAG_7,
